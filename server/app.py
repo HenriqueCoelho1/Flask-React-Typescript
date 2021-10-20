@@ -218,22 +218,26 @@ def create_movie(current_user):
         return jsonify({"error": "This token is invalid"})
 
 
-@app.route("/api/user/<int:user_id>/movie/<movie_id>", methods=["POST"])
+@app.route("/api/user/<int:user_id>/movie/<int:movie_id>", methods=["POST"])
 @jwt_requried
 def user_movie(current_user, user_id, movie_id):
-    print("here --->", type(current_user.id))
-    print(type(user_id))
-    print(type(movie_id))
+    """
+    Rota para atualizar os filmes do usuário autenticado
+    """
     try:
-
+        if current_user.id != user_id:
+            return jsonify({"fail": "invalid user"}), 403
         movie = Movie.query.filter_by(id=movie_id).first()
-        print("movie ->", movie)
-        print("user_id ->", user_id)
-        print("current_user.id ->" + current_user.id)
-        movie.users_movies.append(user_id)
+        # todo: verificar se o usuario já possui o filme cadastrado
+        # se ele possuir faz um: return jsonify({"fail": "filme ja cadastrado"}), 400
+        movie.users_movies.append(current_user)
         db.session.commit()
-        return jsonify({"msg": f"The was associated with {movie.title} success"})
-
+        return jsonify({"msg": "success"}), 200
     except Exception as e:
-        print(f"{e}")
-        return jsonify({"error": "This token is invalid"})
+        print(f"\n erro: {e}\n")
+        return jsonify({"error": "to put this suer"}), 500
+
+
+if __name__ == "__main__":
+    app.debug = os.getenv("FLASK_DEBUG", False)
+    app.run()

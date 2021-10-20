@@ -6,7 +6,7 @@
 env/
 server/venv
 server/migrations
-server/api.rest
+# server/api.rest
 venv/
 .venv/
 env*

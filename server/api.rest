@@ -1,0 +1,39 @@
+//create a user public
+###
+POST http://127.0.0.1:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "username": "Maria",
+    "email": "maria@gmail.com",
+    "password": "123456"
+}
+
+###
+POST http://127.0.0.1:5000/api/login
+Content-Type: application/json
+
+{
+    "email": "maria@gmail.com",
+    "password": "123456"
+}
+
+###
+GET http://127.0.0.1:5000/api/users
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MiwiZXhwIjoxNjM0NzEyOTcyfQ.sg-cs45TxiJGM_CDYPbtjW6Xl4s62R6fAHPEENipmZg
+###
+POST http://127.0.0.1:5000/api/movie/create
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MiwiZXhwIjoxNjM0NzEyOTcyfQ.sg-cs45TxiJGM_CDYPbtjW6Xl4s62R6fAHPEENipmZg
+
+{
+    "title": "A great movie",
+    "description": "A movie somewhere",
+    "genre": "Sci-fi"
+}
+
+###
+POST http://127.0.0.1:5000/api/user/2/movie/1
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MiwiZXhwIjoxNjM0NzM4ODczfQ.Ttm9rk5Di5cJAW6MLAVSW8uwPojKkJOgge1T82k4R1A
+
