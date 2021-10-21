@@ -28,10 +28,10 @@ ma = Marshmallow(app)
 
 
 users_movies = db.Table("users_movies",
-                        db.Column("movies", db.Integer, db.ForeignKey(
-                            "movies.id"), primary_key=True),
                         db.Column("users", db.Integer, db.ForeignKey(
-                            "users.id"), primary_key=True)
+                            "users.id"), primary_key=True, unique=True),
+                        db.Column("movies", db.Integer, db.ForeignKey(
+                            "movies.id"), primary_key=True, unique=True)
                         )
 
 
@@ -41,6 +41,8 @@ class User(db.Model):
     username = db.Column(db.String(84), nullable=False)
     email = db.Column(db.String(84), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
+    movies = db.relationship(
+        'Movie', secondary=users_movies, backref=db.backref('movies'), lazy="dynamic")
 
     def __init__(self, username, email, password):
         self.username = username
@@ -54,24 +56,12 @@ class User(db.Model):
         return f"<User : {self.username}"
 
 
-class UserSchema(ma.Schema):
-    class Meta:
-        fields = ("id", "username", "email")
-
-
-class MovieSchema(ma.Schema):
-    class Meta:
-        fields = ("id", "title", "description", "genre")
-
-
 class Movie(db.Model):
     __tablename__ = "movies"
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     title = db.Column(db.String(84), nullable=False, unique=True)
     description = db.Column(db.Text, nullable=False)
     genre = db.Column(db.String(84), nullable=False)
-    users_movies = db.relationship("User", secondary=users_movies, lazy="subquery",
-                                   backref=db.backref("movies", lazy=True))
 
     def __init__(self, title, description, genre):
         self.title = title
@@ -80,6 +70,16 @@ class Movie(db.Model):
 
     def __repr__(self):
         return f"<User : {self.title}"
+
+
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = ("id", "username", "email")
+
+
+class MovieSchema(ma.Schema):
+    class Meta:
+        fields = ("id", "title", "description", "genre")
 
 
 user_share_schema = UserSchema()
@@ -179,26 +179,22 @@ def all_users(current_user):
     return jsonify(result)
 
 
-# @app.route("/api/movie/create", methods=["POST"])
-# @jwt_requried
-# def create_movie(current_user):
-#     body = request.get_json()
-#     try:
-#         title = body["title"]
-#         description = body["description"]
-#         genre = body["genre"]
-#         user = current_user
-#         movie = Movie(title=title, description=description, genre=genre)
-#         db.session.add(movie)
-#         db.session.commit()
-#         movie.users_movies.append(user)
-#         db.session.commit()
+@app.route("/api/user/<int:user_id>/movie", methods=["GET"])
+@jwt_requried
+def filter_movie_by_user(current_user, user_id):
+    try:
+        # query = User.query.join(User, User.movies)
+        query = db.session.query(User.movies).join(Movie)
+        print(query)
+        results = query.all()
+        print(results)
 
-#         return jsonify({"msg": "The movie was created with success"})
+        return jsonify({"msg": f"{results}"})
 
-#     except Exception as e:
-#         print(f"{e}")
-#         return jsonify({"error": "This token is invalid"})
+    except Exception as e:
+        print(f"{e}")
+        return jsonify({"error": "This token is invalid"})
+
 
 @app.route("/api/movie/create", methods=["POST"])
 @jwt_requried
@@ -227,15 +223,14 @@ def user_movie(current_user, user_id, movie_id):
     try:
         if current_user.id != user_id:
             return jsonify({"fail": "invalid user"}), 403
+        user = User.query.filter_by(id=user_id).first()
         movie = Movie.query.filter_by(id=movie_id).first()
-        # todo: verificar se o usuario já possui o filme cadastrado
-        # se ele possuir faz um: return jsonify({"fail": "filme ja cadastrado"}), 400
-        movie.users_movies.append(current_user)
+        user.movies.append(movie)
         db.session.commit()
         return jsonify({"msg": "success"}), 200
     except Exception as e:
         print(f"\n erro: {e}\n")
-        return jsonify({"error": "to put this suer"}), 500
+        return jsonify({"error": "error to put this movie in your list"}), 500
 
 
 if __name__ == "__main__":
