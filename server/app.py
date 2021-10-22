@@ -29,9 +29,9 @@ ma = Marshmallow(app)
 
 users_movies = db.Table("users_movies",
                         db.Column("users", db.Integer, db.ForeignKey(
-                            "users.id"), primary_key=True, unique=True),
+                            "users.id"), primary_key=True),
                         db.Column("movies", db.Integer, db.ForeignKey(
-                            "movies.id"), primary_key=True, unique=True)
+                            "movies.id"), primary_key=True)
                         )
 
 
@@ -41,8 +41,6 @@ class User(db.Model):
     username = db.Column(db.String(84), nullable=False)
     email = db.Column(db.String(84), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
-    movies = db.relationship(
-        'Movie', secondary=users_movies, backref=db.backref('movies'), lazy="dynamic")
 
     def __init__(self, username, email, password):
         self.username = username
@@ -62,6 +60,8 @@ class Movie(db.Model):
     title = db.Column(db.String(84), nullable=False, unique=True)
     description = db.Column(db.Text, nullable=False)
     genre = db.Column(db.String(84), nullable=False)
+    users = db.relationship(
+        'User', secondary=users_movies, backref=db.backref('movies'), lazy="subquery")
 
     def __init__(self, title, description, genre):
         self.title = title
@@ -183,13 +183,13 @@ def all_users(current_user):
 @jwt_requried
 def filter_movie_by_user(current_user, user_id):
     try:
-        # query = User.query.join(User, User.movies)
-        query = db.session.query(User.movies).join(Movie)
+        query = Movie.query \
+            .join(User, Movie.users) \
+            .filter(User.id == user_id) \
+            .all()
         print(query)
-        results = query.all()
-        print(results)
 
-        return jsonify({"msg": f"{results}"})
+        return jsonify({"msg": f"{query}"})
 
     except Exception as e:
         print(f"{e}")

@@ -4,7 +4,7 @@ POST http://127.0.0.1:5000/api/register
 Content-Type: application/json
 
 {
-    "username": "Carlos",
+    "username": "carlos",
     "email": "carlos@gmail.com",
     "password": "123456"
 }
@@ -14,7 +14,7 @@ POST http://127.0.0.1:5000/api/login
 Content-Type: application/json
 
 {
-    "email": "maria@gmail.com",
+    "email": "joao@gmail.com",
     "password": "123456"
 }
 
@@ -24,19 +24,19 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MiwiZXhwIjoxN
 ###
 POST http://127.0.0.1:5000/api/movie/create
 Content-Type: application/json
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MiwiZXhwIjoxNjM0ODAzMzU0fQ.A4a1e2cJALi-e_S47i_Gc4NRlzJgN-3WrfYr5gXPQAU
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZXhwIjoxNjM0ODg2NjIyfQ.NogEFsX1eUqPwvCw5aJjN_kW_QSl5leYEJ5OJ9OXO98
 
 {
-    "title": "Crepusculo",
-    "description": "A bad movie",
-    "genre": "Romance"
+    "title": "Destroyer",
+    "description": "A epic movie",
+    "genre": "Action"
 }
 
 ###
-POST http://127.0.0.1:5000/api/user/2/movie/2
+POST http://127.0.0.1:5000/api/user/1/movie/3
 Content-Type: application/json
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MiwiZXhwIjoxNjM0ODAzMzU0fQ.A4a1e2cJALi-e_S47i_Gc4NRlzJgN-3WrfYr5gXPQAU
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZXhwIjoxNjM0ODg2NjIyfQ.NogEFsX1eUqPwvCw5aJjN_kW_QSl5leYEJ5OJ9OXO98
 
 ###
-GET http://127.0.0.1:5000/api/user/2/movie
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MiwiZXhwIjoxNjM0ODAzMzU0fQ.A4a1e2cJALi-e_S47i_Gc4NRlzJgN-3WrfYr5gXPQAU
+GET http://127.0.0.1:5000/api/user/1/movie
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZXhwIjoxNjM0ODg2NjIyfQ.NogEFsX1eUqPwvCw5aJjN_kW_QSl5leYEJ5OJ9OXO98
