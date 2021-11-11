@@ -1,3 +1,4 @@
+from app.main import main as main_blueprint
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,9 +10,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from functools import wraps
 
-
 load_dotenv(override=True)
 app = Flask(__name__)
+
 
 root_db = os.getenv("ROOT")
 pass_db = os.getenv("PASS")
@@ -126,9 +127,7 @@ def make_shell_context():
     )
 
 
-@app.route("/", methods=["GET"])
-def index():
-    return "Testing server"
+app.register_blueprint(main_blueprint)
 
 
 @app.route("/api/register", methods=["POST"])
