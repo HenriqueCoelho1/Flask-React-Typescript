@@ -1,4 +1,3 @@
-from app.main import main as main_blueprint
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -21,19 +20,20 @@ postgree_port_db = os.getenv("POSTGREE_PORT")
 db_name = os.getenv("DATABASE_NAME")
 secret_key = os.getenv("SECRET_KEY")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{root_db}:{pass_db}@{localhost_db}:{postgree_port_db}/{db_name}"
+app.config[
+    "SQLALCHEMY_DATABASE_URI"
+] = f"postgresql://{root_db}:{pass_db}@{localhost_db}:{postgree_port_db}/{db_name}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = f"{secret_key}"
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 
-users_movies = db.Table("users_movies",
-                        db.Column("users", db.Integer, db.ForeignKey(
-                            "users.id"), primary_key=True),
-                        db.Column("movies", db.Integer, db.ForeignKey(
-                            "movies.id"), primary_key=True)
-                        )
+users_movies = db.Table(
+    "users_movies",
+    db.Column("users", db.Integer, db.ForeignKey("users.id"), primary_key=True),
+    db.Column("movies", db.Integer, db.ForeignKey("movies.id"), primary_key=True),
+)
 
 
 class User(db.Model):
@@ -62,7 +62,8 @@ class Movie(db.Model):
     description = db.Column(db.Text, nullable=False)
     genre = db.Column(db.String(84), nullable=False)
     users = db.relationship(
-        'User', secondary=users_movies, backref=db.backref('movies'), lazy="subquery")
+        "User", secondary=users_movies, backref=db.backref("movies"), lazy="subquery"
+    )
 
     def __init__(self, title, description, genre):
         self.title = title
@@ -108,26 +109,26 @@ def jwt_requried(f):
         try:
             token_pure = token.replace("Bearer ", "")
             decoded = jwt.decode(
-                token_pure, app.config["SECRET_KEY"], algorithms=["HS256"])
+                token_pure, app.config["SECRET_KEY"], algorithms=["HS256"]
+            )
             current_user = User.query.get(decoded["id"])
         except Exception as e:
             print(f"{e}")
             return jsonify({"error": "This token is invalid"})
 
         return f(current_user=current_user, *args, **kwargs)
+
     return wrapper
 
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(
-        app=app,
-        db=db,
-        User=User
-    )
+    return dict(app=app, db=db, User=User)
 
 
-app.register_blueprint(main_blueprint)
+@app.route("/", methods=["GET"])
+def index():
+    return "Testing server"
 
 
 @app.route("/api/register", methods=["POST"])
@@ -141,8 +142,7 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        result = user_share_schema.dump(
-            User.query.filter_by(email=email).first())
+        result = user_share_schema.dump(User.query.filter_by(email=email).first())
 
         return jsonify(result)
 
@@ -155,13 +155,11 @@ def login():
     user = User.query.filter_by(email=email).first_or_404()
 
     if not user.verify_password(password):
-        return jsonify({
-            "error": "Your email or your password is incorrect"
-        }), 403
+        return jsonify({"error": "Your email or your password is incorrect"}), 403
 
     payload = {
         "id": user.id,
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=10)
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=10),
     }
     token = jwt.encode(payload, app.config["SECRET_KEY"], algorithm="HS256")
 
@@ -171,9 +169,7 @@ def login():
 @app.route("/api/users")
 @jwt_requried
 def all_users(current_user):
-    result = users_share_schema.dump(
-        User.query.all()
-    )
+    result = users_share_schema.dump(User.query.all())
 
     return jsonify(result)
 
@@ -182,10 +178,7 @@ def all_users(current_user):
 @jwt_requried
 def filter_movie_by_user(current_user, user_id):
     try:
-        query = Movie.query \
-            .join(User, Movie.users) \
-            .filter(User.id == user_id) \
-            .all()
+        query = Movie.query.join(User, Movie.users).filter(User.id == user_id).all()
         print(query)
 
         return jsonify({"msg": f"{query}"})
